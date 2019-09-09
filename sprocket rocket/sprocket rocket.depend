@@ -1,0 +1,13 @@
+# depslib dependency file v1.0
+1431747493 source:c:\users\dnzlt_000\desktop\programs\sprocket rocket\main.cpp
+	<iostream>
+	<SDL/SDL.h>
+	<SDL/SDL_opengl.h>
+	<SDL/SDL_image.h>
+	<string>
+	<sstream>
+	<math.h>
+	<vector>
+	<deque>
+	<algorithm>
+
