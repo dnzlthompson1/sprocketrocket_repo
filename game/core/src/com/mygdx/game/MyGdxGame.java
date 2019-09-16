@@ -61,7 +61,7 @@ public class MyGdxGame extends ApplicationAdapter
 
 		if (game_start)
 		{
-			ycord-=1 ;
+			ycord-=1;
 			if(ycord<=-(60000/33))ycord=0;
 			ycord2-=1 ;
 			if(ycord2<=-(60000/33))ycord2=0;
@@ -74,12 +74,12 @@ public class MyGdxGame extends ApplicationAdapter
 			for(int i=0;i<alien.length;i++)	{
 				alien[i].update(rocket,scr);
 			}
-			for( Sprocket sproc:sprockets){
-				sproc.update();
-			}
+			//for( Sprocket sproc:sprockets){
+				//sproc.update();
+			//}
 			if(touch)
 			{
-				//rocket.fireSprocket();
+				rocket.fireSprocket();
 			}
 
 			//collisions//////////////////////////////////////////////////////////////////////////////
@@ -92,9 +92,9 @@ public class MyGdxGame extends ApplicationAdapter
 		for(int i=0;i<alien.length;i++ ){
 			alien[i].draw();
 		}
-		for( Sprocket sproc:sprockets){
-			sproc.draw();
-		}
+		//for( Sprocket sproc:sprockets){
+			//sproc.draw();
+		//}
 
 		batch.begin();
 		font.draw(batch,"AX: " + Float.toString(ax),300,300);
@@ -169,7 +169,8 @@ public class MyGdxGame extends ApplicationAdapter
 		}
 		void fireSprocket()
 		{
-			sprockets.add(new Sprocket(click_x,click_y,rocket,scr));
+			Sprocket makespc=new Sprocket(click_x,click_y,rocket,scr);
+			sprockets.add(makespc);
 		}
 	};
 	class Sprocket
