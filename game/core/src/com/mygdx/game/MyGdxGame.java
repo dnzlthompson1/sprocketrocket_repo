@@ -30,7 +30,7 @@ public class MyGdxGame extends ApplicationAdapter
 	int click_x=0, click_y=0;
 	int mouse_x2=0, mouse_y2=0;
 	Screen scr= new Screen();
-	Queue<Sprocket> sprockets;
+	ArrayDeque<Sprocket> sprockets = new ArrayDeque<Sprocket>();
 	Deque<Alien1> alien1;
 	boolean touch=false;
 
@@ -74,9 +74,9 @@ public class MyGdxGame extends ApplicationAdapter
 			for(int i=0;i<alien.length;i++)	{
 				alien[i].update(rocket,scr);
 			}
-			//for( Sprocket sproc:sprockets){
-				//sproc.update();
-			//}
+			for( Sprocket sproc:sprockets){
+				sproc.update();
+			}
 			if(touch)
 			{
 				rocket.fireSprocket();
@@ -92,9 +92,9 @@ public class MyGdxGame extends ApplicationAdapter
 		for(int i=0;i<alien.length;i++ ){
 			alien[i].draw();
 		}
-		//for( Sprocket sproc:sprockets){
-			//sproc.draw();
-		//}
+		for( Sprocket sproc:sprockets){
+			sproc.draw();
+		}
 
 		batch.begin();
 		font.draw(batch,"AX: " + Float.toString(ax),300,300);
@@ -169,8 +169,7 @@ public class MyGdxGame extends ApplicationAdapter
 		}
 		void fireSprocket()
 		{
-			Sprocket makespc=new Sprocket(click_x,click_y,rocket,scr);
-			sprockets.add(makespc);
+			sprockets.add(new Sprocket(click_x,click_y,rocket,scr));
 		}
 	};
 	class Sprocket
@@ -181,13 +180,13 @@ public class MyGdxGame extends ApplicationAdapter
 		{
 			x=rocket.x;
 			y=rocket.y;
-			dirx= (float) ((click_x-rocket.x)/Math.sqrt(Math.pow(click_x-rocket.x,2)+Math.pow(click_y-rocket.y,2)));
-			diry= (float) ((click_y-rocket.y)/Math.sqrt(Math.pow(click_x-rocket.x,2)+Math.pow(click_y-rocket.y,2)));
+			dirx= (float) ((click_x-rocket.x)/Math.sqrt(Math.pow(click_x-rocket.x,2)+Math.pow(click_y-(rocket.y-scr.bottom),2)));
+			diry= (float) ((click_y-(rocket.y-scr.bottom))/Math.sqrt(Math.pow(click_x-rocket.x,2)+Math.pow(click_y-(rocket.y-scr.bottom),2)));
 		}
 		void draw()
 		{
 			batch.begin();
-			batch.draw(imgalien, x, y-scr.bottom);
+			batch.draw(imgsprocket, x, y-scr.bottom);
 			batch.end();
 		}
 		void update()
