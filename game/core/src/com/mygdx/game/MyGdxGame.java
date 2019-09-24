@@ -9,11 +9,8 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.Queue;
 
-public class MyGdxGame extends ApplicationAdapter
-{
+public class MyGdxGame extends ApplicationAdapter{
 	private SpriteBatch batch;
 	private BitmapFont font;
 	private Texture imgrocket;
@@ -31,11 +28,11 @@ public class MyGdxGame extends ApplicationAdapter
 	int mouse_x2=0, mouse_y2=0;
 	Screen scr= new Screen();
 	ArrayDeque<Sprocket> sprockets = new ArrayDeque<Sprocket>();
-	Deque<Alien1> alien1;
 	boolean touch=false;
+	boolean letgo=true;
 
 	@Override
-	public void create () {
+	public void create(){
 		shapeRenderer = new ShapeRenderer();
 		batch = new SpriteBatch();
 		imgrocket = new Texture("rocket.png");
@@ -56,11 +53,17 @@ public class MyGdxGame extends ApplicationAdapter
 		az = Gdx.input.getAccelerometerZ();
 		if (Gdx.input.isTouched())game_start=true;
 		click_x=Gdx.input.getX();
-		click_y=Gdx.input.getY();
+		click_y=-Gdx.input.getY()+1800;
 		touch =Gdx.input.isTouched();
 
 		if (game_start)
 		{
+			Sprocket frspoc=sprockets.peek();
+			if(frspoc != null){
+				if(Math.abs(frspoc.x)>3000 || Math.abs(frspoc.y-scr.bottom)>3000){
+					sprockets.pop();
+				}
+			}
 			ycord-=1;
 			if(ycord<=-(60000/33))ycord=0;
 			ycord2-=1 ;
@@ -71,15 +74,21 @@ public class MyGdxGame extends ApplicationAdapter
 			scr.top+=3;
 
 			rocket.update();
-			for(int i=0;i<alien.length;i++)	{
+			for(int i=0;i<alien.length;i++){
 				alien[i].update(rocket,scr);
 			}
 			for( Sprocket sproc:sprockets){
 				sproc.update();
 			}
-			if(touch)
+			if(touch && !letgo)
 			{
 				rocket.fireSprocket();
+			}
+			if(!touch)
+			{
+				letgo=false;
+			}else{
+				letgo=true;
 			}
 
 			//collisions//////////////////////////////////////////////////////////////////////////////
@@ -112,7 +121,7 @@ public class MyGdxGame extends ApplicationAdapter
 		display();
 	}
 	@Override
-	public void dispose (){
+	public void dispose(){
 		batch.dispose();
 		imgrocket.dispose();
 		imgsprocket.dispose();
@@ -127,8 +136,7 @@ public class MyGdxGame extends ApplicationAdapter
 	class Block{
 		float x,y;
 		Block (float bx,float by){x=bx;y=by;}
-		void draw()
-		{
+		void draw(){
 			shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 			shapeRenderer.rect(x-20,y-scr.bottom-6,40,12,Color.BLUE,Color.BLUE,Color.BLUE,Color.BLUE);
 			shapeRenderer.end();
@@ -146,7 +154,6 @@ public class MyGdxGame extends ApplicationAdapter
 		void draw(){
 			frame++;
 			if(frame>9)frame=1;
-
 			batch.begin();
 			batch.draw(imgrocket, x-25, y-scr.bottom-65,50,130);
 			batch.end();
@@ -163,40 +170,33 @@ public class MyGdxGame extends ApplicationAdapter
 				moveRight();
 			}
 		}
-		void moveLeft()
-		{
+		void moveLeft(){
 			x-=10;
 		}
-		void fireSprocket()
-		{
+		void fireSprocket(){
 			sprockets.add(new Sprocket(click_x,click_y,rocket,scr));
 		}
 	};
-	class Sprocket
-	{
+	class Sprocket{
 		float x,y;
 		float dirx,diry;
-		Sprocket(float click_x,float click_y,Rocket rocket,Screen scr)
-		{
+		Sprocket(float click_x,float click_y,Rocket rocket,Screen scr){
 			x=rocket.x;
 			y=rocket.y;
 			dirx= (float) ((click_x-rocket.x)/Math.sqrt(Math.pow(click_x-rocket.x,2)+Math.pow(click_y-(rocket.y-scr.bottom),2)));
 			diry= (float) ((click_y-(rocket.y-scr.bottom))/Math.sqrt(Math.pow(click_x-rocket.x,2)+Math.pow(click_y-(rocket.y-scr.bottom),2)));
 		}
-		void draw()
-		{
+		void draw(){
 			batch.begin();
-			batch.draw(imgsprocket, x, y-scr.bottom);
+			batch.draw(imgsprocket, x, y-scr.bottom,65,65);
 			batch.end();
 		}
-		void update()
-		{
+		void update(){
 			x+=10*dirx;
 			y+=10*diry;
 		}
 	};
-	class Alien
-	{
+	class Alien{
 		private int jump_point_x;
 		private int jump_point_y;
 		private Block ablo;
@@ -206,15 +206,12 @@ public class MyGdxGame extends ApplicationAdapter
 		private int flatspeed;
 		private boolean alive=true;
 		private int upspeed=25;
-		Alien(int ax, int ay)
-		{
+		Alien(int ax, int ay){
 			x=ax;y=ay;jump_point_x=ax;jump_point_y=ay;
 			ablo= new Block(jump_point_x,jump_point_y-30);
 		}
-		void draw()
-		{
-			if(alive)
-			{
+		void draw(){
+			if(alive){
 				batch.begin();
 				batch.draw(imgalien, x-25, y-scr.bottom-25,50,50);
 				batch.end();
@@ -222,8 +219,7 @@ public class MyGdxGame extends ApplicationAdapter
 			ablo.draw();
 		}
 
-		private void resurect()
-		{
+		private void resurect(){
 			alive=true;
 			upspeed=25;
 			jump=false;
@@ -231,17 +227,16 @@ public class MyGdxGame extends ApplicationAdapter
 			x=jump_point_x;
 			y=jump_point_y;
 		}
-		void update(Rocket rocket,Screen scr)
-		{
-			try {
+		void update(Rocket rocket,Screen scr){
+			try{
 				ablo.x = jump_point_x;
 				ablo.y = jump_point_y-30;
 				if (y < rocket.y + 150 && rocket.x < x + 100 && rocket.x > x - 100) jump = true;
-				if (y > rocket.y - 20 && y < rocket.y + 20 && rocket.x < x + 10 && rocket.x > x - 10) {
+				if (y > rocket.y - 20 && y < rocket.y + 20 && rocket.x < x + 10 && rocket.x > x - 10){
 					if (alive) rocket.health -= 5;
 					alive = false;
 				}
-				if (jump) {
+				if (jump){
 					upspeed -= 1.5;
 					y += upspeed;
 					x += flatspeed * 5;
@@ -262,25 +257,20 @@ public class MyGdxGame extends ApplicationAdapter
 		private int x,y;
 		private boolean alive=true;
 		private int upspeed=0;
-		Alien1(Screen scr,boolean ls)
-		{
+		Alien1(Screen scr,boolean ls){
 			y= (int) (scr.top+50);
 			if(ls) x = 30;
 			else x=970;
 		}
-		void draw()
-		{
-			if(alive)
-			{
+		void draw(){
+			if(alive){
 				/*draw stuff-scr.bottom*/
 			}
 		}
-		void update(Rocket rocket,Screen scr)
-		{
+		void update(Rocket rocket,Screen scr){
 			if(y>rocket.y+150||y>scr.top-30)upspeed=0;
 			else if(y<rocket.y-150||y<scr.bottom+20) upspeed=4;
-			if(y>rocket.y-20&&y<rocket.y+20&&rocket.x<x+10&&rocket.x>x-10)
-			{
+			if(y>rocket.y-20&&y<rocket.y+20&&rocket.x<x+10&&rocket.x>x-10){
 				if(alive) rocket.health-=5;
 				alive=false;
 			}
