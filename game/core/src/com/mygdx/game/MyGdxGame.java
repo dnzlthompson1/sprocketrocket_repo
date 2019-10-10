@@ -188,7 +188,7 @@ public class MyGdxGame extends ApplicationAdapter{
 		}
 		void draw(){
 			batch.begin();
-			batch.draw(imgsprocket, x, y-scr.bottom,65,65);
+			batch.draw(imgsprocket, x-45, y-45-scr.bottom,70,70);
 			batch.end();
 		}
 		void update(){
