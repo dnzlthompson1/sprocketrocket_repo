@@ -19,17 +19,19 @@ public class MyGdxGame extends ApplicationAdapter{
 	private Texture imgbackdrop;
 	private Alien[] alien = new Alien[3];
 	private Rocket rocket = new Rocket();
-	ShapeRenderer shapeRenderer;
-	float ax, ay, az;
+	private ShapeRenderer shapeRenderer;
+	private float ax, ay, az;
 	private int frame=0;
 	private boolean game_start=false;
 	private float xcord=0, ycord=0, ycord2=0;
-	int click_x=0, click_y=0;
+	private int click_x=0, click_y=0;
 	int mouse_x2=0, mouse_y2=0;
-	Screen scr= new Screen();
+	private Screen scr= new Screen();
 	ArrayDeque<Sprocket> sprockets = new ArrayDeque<Sprocket>();
-	boolean touch=false;
-	boolean letgo=true;
+	private boolean touch=false;
+	private boolean letgo=true;
+	private boolean[] ar_collid = {false,false,false};
+	private boolean[] delid = {true,true,true};
 
 	@Override
 	public void create(){
@@ -40,6 +42,7 @@ public class MyGdxGame extends ApplicationAdapter{
 		imgsprocket = new Texture("sprocket.png");
 		imgbackdrop = new Texture("backdrop.png");
 		font = new BitmapFont(Gdx.files.internal("arial.fnt"));
+		Gdx.graphics.setWindowedMode(1080, 2200);
 
 		int alienX[]={300,400,500};
 		int alienY[]={1000,900,800};
@@ -47,17 +50,17 @@ public class MyGdxGame extends ApplicationAdapter{
 			alien[i]=new Alien(alienX[i],alienY[i]);
 		}
 	}
+
 	void updatescene(){
 		ax = Gdx.input.getAccelerometerX();
 		ay = Gdx.input.getAccelerometerY();
 		az = Gdx.input.getAccelerometerZ();
 		if (Gdx.input.isTouched())game_start=true;
 		click_x=Gdx.input.getX();
-		click_y=-Gdx.input.getY()+1800;
+		click_y=-Gdx.input.getY()+2200;
 		touch =Gdx.input.isTouched();
 
-		if (game_start)
-		{
+		if (game_start){
 			Sprocket frspoc=sprockets.peek();
 			if(frspoc != null){
 				if(Math.abs(frspoc.x)>3000 || Math.abs(frspoc.y-scr.bottom)>3000){
@@ -80,22 +83,37 @@ public class MyGdxGame extends ApplicationAdapter{
 			for( Sprocket sproc:sprockets){
 				sproc.update();
 			}
-			if(touch && !letgo)
+			if(touch && letgo)
 			{
 				rocket.fireSprocket();
 			}
 			if(!touch)
 			{
-				letgo=false;
-			}else{
 				letgo=true;
+			}else{
+				letgo=false;
 			}
 
 			//collisions//////////////////////////////////////////////////////////////////////////////
 			//collisions();
 			/////////////////////////////////////////////////
+
+			for(int i=0;i<alien.length;i++) {
+				if (rocket.x - 100 < alien[i].x && rocket.x + 100 > alien[i].x && rocket.y - 100 < alien[i].y && rocket.y + 100 > alien[i].y) {
+					ar_collid[i]= true;
+				}
+				if(ar_collid[i] && delid[i]){
+					rocket.health -= 1;
+				}
+				if(!ar_collid[i]){
+					delid[i]=true;
+				}else{
+					delid[i]=false;
+				}
+			}
 		}
 	}
+
 	void display(){
 		rocket.draw();
 		for(int i=0;i<alien.length;i++ ){
@@ -109,7 +127,8 @@ public class MyGdxGame extends ApplicationAdapter{
 		font.draw(batch,"AX: " + Float.toString(ax),300,300);
 		font.draw(batch,"AY: " + Float.toString(ay),300,260);
 		font.draw(batch,"AZ: " + Float.toString(az),300,220);
-		font.draw(batch,"click xy:"+ Float.toString(click_x)+'-'+ Float.toString(click_y),300,180);
+		font.draw(batch,"click x:"+ Float.toString(click_x)+ " y:" + Float.toString(click_y),300,180);
+		font.draw(batch,"rocket health:"+ Float.toString(rocket.health),300,140);
 
 		batch.end();
 	}
@@ -179,6 +198,8 @@ public class MyGdxGame extends ApplicationAdapter{
 	};
 	class Sprocket{
 		float x,y;
+		public float getx(){return x;}
+		public float gety(){return y;}
 		float dirx,diry;
 		Sprocket(float click_x,float click_y,Rocket rocket,Screen scr){
 			x=rocket.x;
