@@ -31,7 +31,7 @@ public class MyGdxGame extends ApplicationAdapter{
 	private boolean touch=false;
 	private boolean letgo=true;
 	private boolean[] ar_collid = {false,false,false};
-	private boolean[] delid = {true,true,true};
+	private boolean[] ar_dellid = {true,true,true};
 
 	@Override
 	public void create(){
@@ -96,21 +96,9 @@ public class MyGdxGame extends ApplicationAdapter{
 
 			//collisions//////////////////////////////////////////////////////////////////////////////
 			//collisions();
-			/////////////////////////////////////////////////
+			//////////////////////////////////////////////////////////////////////////////////////////
 
-			for(int i=0;i<alien.length;i++) {
-				if (rocket.x - 100 < alien[i].x && rocket.x + 100 > alien[i].x && rocket.y - 100 < alien[i].y && rocket.y + 100 > alien[i].y) {
-					ar_collid[i]= true;
-				}
-				if(ar_collid[i] && delid[i]){
-					rocket.health -= 1;
-				}
-				if(!ar_collid[i]){
-					delid[i]=true;
-				}else{
-					delid[i]=false;
-				}
-			}
+
 		}
 	}
 
@@ -129,6 +117,7 @@ public class MyGdxGame extends ApplicationAdapter{
 		font.draw(batch,"AZ: " + Float.toString(az),300,220);
 		font.draw(batch,"click x:"+ Float.toString(click_x)+ " y:" + Float.toString(click_y),300,180);
 		font.draw(batch,"rocket health:"+ Float.toString(rocket.health),300,140);
+		font.draw(batch,"ar_collid[0]:"+ Boolean.toString(ar_collid[0])+ " ar_delid[0]:"+ Boolean.toString(ar_dellid[0]),300,100);
 
 		batch.end();
 	}
@@ -254,11 +243,24 @@ public class MyGdxGame extends ApplicationAdapter{
 				ablo.y = jump_point_y-30;
 				if (y < rocket.y + 150 && rocket.x < x + 100 && rocket.x > x - 100) jump = true;
 				if (y > rocket.y - 20 && y < rocket.y + 20 && rocket.x < x + 10 && rocket.x > x - 10){
-					if (alive) rocket.health -= 5;
+					//if (alive) rocket.health -= 5;
 					alive = false;
 				}
+				if (rocket.x - 50 < x && rocket.x + 50 > x && rocket.y - 50 < y && rocket.y + 50 > y){
+					ar_collid[0]= true;
+				}else{
+					ar_collid[0]= false;
+				}
+				if(ar_collid[0] && ar_dellid[0]){
+					rocket.health -= 1;
+				}
+				if(!ar_collid[0]){
+					ar_dellid[0]=true;
+				}else{
+					ar_dellid[0]=false;
+				}
 				if (jump){
-					upspeed -= 1.5;
+					if (upspeed>-30){upspeed -= 1.5;}
 					y += upspeed;
 					x += flatspeed * 5;
 				}
@@ -291,10 +293,6 @@ public class MyGdxGame extends ApplicationAdapter{
 		void update(Rocket rocket,Screen scr){
 			if(y>rocket.y+150||y>scr.top-30)upspeed=0;
 			else if(y<rocket.y-150||y<scr.bottom+20) upspeed=4;
-			if(y>rocket.y-20&&y<rocket.y+20&&rocket.x<x+10&&rocket.x>x-10){
-				if(alive) rocket.health-=5;
-				alive=false;
-			}
 			y+=upspeed;
 		}
 	};
